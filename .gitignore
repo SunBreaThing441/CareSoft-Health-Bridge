@@ -1,0 +1,32 @@
+# Build targets and artifacts
+**/target/
+target/
+**/build/
+build/
+.mvn/wrapper/maven-wrapper.jar
+
+# Database files
+**/data/
+data/
+*.mv.db
+*.trace.db
+
+# IDE and Editor files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+.sts4-cache
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary & test files
+*.log

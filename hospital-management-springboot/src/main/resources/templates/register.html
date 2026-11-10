@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Intake | CareSoft Health Bridge: UNESCO Global Health Logistics</title>
+    
+    <!-- Spring Security CSRF Meta Tokens -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script src="/js/caresoft-security-guard.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030712',
+                        clinical: '#0b1329',
+                        surface: '#0f172a',
+                        cryo: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        telemetry: '#00f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 240, 255, 0.03) 50%, rgba(0, 240, 255, 0.03));
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-void text-slate-100 min-h-screen font-sans flex items-center justify-center p-4 py-8 relative scanline">
+
+    <!-- Ambient Orbital Background Glows -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-cryo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-telemetry/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <main class="w-full max-w-2xl z-10">
+        <div class="glass-panel p-8 sm:p-10 rounded-3xl relative">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cryo-600 to-telemetry flex items-center justify-center text-void shadow-md shadow-telemetry/20">
+                        <i class="fas fa-id-card-clip text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Citizen Health Identity Intake</h1>
+                        <p class="text-xs text-slate-400 font-mono">CARESOFT HEALTH BRIDGE PROTOCOL // UNESCO GLOBAL HEALTH LOGISTICS</p>
+                    </div>
+                </div>
+                <a href="/login" class="text-xs font-mono text-slate-400 hover:text-telemetry transition flex items-center gap-1">
+                    <i class="fas fa-arrow-left"></i> Login
+                </a>
+            </div>
+
+            <!-- Errors -->
+            <div th:if="${error}" class="mt-6 p-4 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs flex items-center gap-2.5">
+                <i class="fas fa-circle-exclamation text-base text-red-400"></i>
+                <span th:text="${error}">Email already registered in global registry.</span>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/register}" th:object="${patient}" method="post" class="mt-6 space-y-6">
+                
+                <!-- Full Legal Name -->
+                <div>
+                    <label class="block text-xs font-mono uppercase text-slate-300 mb-2">
+                        <i class="fas fa-user text-telemetry mr-1"></i> Full Legal Name
+                    </label>
+                    <input type="text" th:field="*{name}" required
+                           class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none"
+                           placeholder="Johnathan Doe">
+                </div>
+
+                <!-- Grid: Email & Phone -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2">
+                            <i class="fas fa-envelope text-telemetry mr-1"></i> Official Email Address
+                        </label>
+                        <input type="email" th:field="*{email}" required
+                               class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none"
+                               placeholder="citizen@caresoft.org">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2">
+                            <i class="fas fa-phone text-telemetry mr-1"></i> Primary Contact Telephone
+                        </label>
+                        <input type="tel" th:field="*{phone}" required
+                               class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none"
+                               placeholder="+1 (555) 019-2834">
+                    </div>
+                </div>
+
+                <!-- Grid: Gender & Date of Birth -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2">
+                            <i class="fas fa-venus-mars text-telemetry mr-1"></i> Biometric Gender
+                        </label>
+                        <select th:field="*{gender}" required
+                                class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other / Non-binary</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2">
+                            <i class="fas fa-cake-candles text-telemetry mr-1"></i> Date of Birth
+                        </label>
+                        <input type="date" id="dobInput" th:field="*{dob}" required
+                               class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none">
+                    </div>
+                </div>
+
+                <!-- Password with Live Strength Indicator -->
+                <div>
+                    <label class="block text-xs font-mono uppercase text-slate-300 mb-2 flex items-center justify-between">
+                        <span><i class="fas fa-lock text-telemetry mr-1"></i> Cryptographic Access Key (Password)</span>
+                        <span id="strengthText" class="text-[10px] text-slate-400 font-mono">Min 6 chars</span>
+                    </label>
+                    <input type="password" id="passInput" name="password" required minlength="6"
+                           class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3 text-sm transition outline-none"
+                           placeholder="••••••••••••"
+                           oninput="checkPasswordStrength(this.value)">
+                    <!-- Strength Bar -->
+                    <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div id="strengthBar" class="h-full bg-slate-700 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn"
+                        class="w-full bg-gradient-to-r from-cryo-600 via-teal-500 to-telemetry hover:opacity-95 text-void font-extrabold py-3.5 rounded-xl text-sm font-mono uppercase tracking-wider transition-all duration-200 transform hover:scale-[1.01] shadow-lg shadow-cryo-600/30 flex items-center justify-center gap-2">
+                    <i class="fas fa-fingerprint"></i>
+                    <span id="btnText">Generate Sovereign Health ID</span>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-400">
+                Already registered in the global health database?
+                <a href="/login" class="text-telemetry font-semibold hover:underline ml-1">Access Terminal</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set max date for Date of Birth to today
+            const today = new Date().toISOString().split('T')[0];
+            const dobInput = document.getElementById('dobInput');
+            if (dobInput) dobInput.max = today;
+
+            // Form submission visual spinner
+            const form = document.querySelector('form');
+            form.addEventListener('submit', () => {
+                const btn = document.getElementById('submitBtn');
+                const text = document.getElementById('btnText');
+                if (btn && text) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75');
+                    text.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Registering Citizen...';
+                }
+            });
+        });
+
+        function checkPasswordStrength(val) {
+            const bar = document.getElementById('strengthBar');
+            const text = document.getElementById('strengthText');
+            if (!val || val.length < 6) {
+                bar.style.width = '20%';
+                bar.className = 'h-full bg-rose-500';
+                text.textContent = 'Weak (Needs >= 6 chars)';
+                text.className = 'text-[10px] text-rose-400 font-mono';
+            } else if (val.length < 10 || !/\d/.test(val)) {
+                bar.style.width = '60%';
+                bar.className = 'h-full bg-amber-400';
+                text.textContent = 'Moderate (Add digits or symbols)';
+                text.className = 'text-[10px] text-amber-400 font-mono';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'h-full bg-emerald-400';
+                text.textContent = 'Cryptographically Strong';
+                text.className = 'text-[10px] text-emerald-400 font-mono';
+            }
+        }
+    </script>
+
+</body>
+</html>

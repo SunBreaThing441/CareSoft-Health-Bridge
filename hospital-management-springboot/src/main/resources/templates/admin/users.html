@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Personnel Directory | CareSoft Health Bridge: UNESCO Global Health Logistics</title>
+    
+    <!-- Spring Security CSRF Meta Tokens -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script src="/js/caresoft-security-guard.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030712',
+                        clinical: '#0b1329',
+                        surface: '#0f172a',
+                        cryo: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        telemetry: '#00f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 240, 255, 0.02) 50%, rgba(0, 240, 255, 0.02));
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-void text-slate-100 min-h-screen font-sans scanline" data-user-role="ADMIN">
+
+    <!-- Top Navigation HUD -->
+    <header class="glass-panel sticky top-0 z-50 border-x-0 border-t-0 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex justify-between items-center">
+            
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashboard" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-telemetry flex items-center justify-center text-white shadow-md">
+                        <i class="fas fa-users-gear text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                            <span>CareSoft <span class="text-telemetry">Health Bridge</span></span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-950/80 border border-purple-500/30 text-purple-300">Personnel</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-mono">GLOBAL ROLES & IDENTITY MATRIX</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashboard" class="text-xs font-mono text-slate-300 hover:text-white px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 transition">
+                    ← Dashboard
+                </a>
+                <button type="button" onclick="CareSoftSecurity.logout()" class="text-xs font-mono text-red-400 hover:text-red-300 p-2.5 rounded-xl bg-red-950/30 border border-red-500/20 hover:border-red-500/40 transition" title="Logout">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        
+        <!-- Alerts -->
+        <div th:if="${msg}" class="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2.5">
+            <i class="fas fa-check-circle text-base text-emerald-400"></i>
+            <span th:text="${msg}">Operation completed successfully.</span>
+        </div>
+
+        <!-- Table Container -->
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2.5">
+                        <i class="fas fa-address-book text-telemetry"></i> Global Personnel Directory
+                    </h1>
+                    <p class="text-xs text-slate-400 font-mono mt-0.5">AUTHORITY LEVELS & CREDENTIAL CONTROLS</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="userSearch" placeholder="Search personnel..." oninput="filterUsers(this.value)"
+                           class="bg-slate-900 border border-slate-700 focus:border-telemetry text-xs text-white rounded-xl px-3.5 py-1.5 font-mono outline-none">
+                    <div class="text-xs font-mono text-slate-400 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+                        Total Registered: <span class="text-cyan-400 font-bold" th:text="${#lists.size(users)}">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm" id="userTable">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs font-mono text-slate-400 uppercase">
+                            <th class="py-3 px-4">ID</th>
+                            <th class="py-3 px-4">Full Identity</th>
+                            <th class="py-3 px-4">Contact Email</th>
+                            <th class="py-3 px-4">Assigned Role</th>
+                            <th class="py-3 px-4">Authority Modification</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-sans">
+                        <tr th:each="u : ${users}" class="user-row hover:bg-slate-900/50 transition">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-500" th:text="'#' + ${u.id}">#1</td>
+                            <td class="user-name py-4 px-4 font-bold text-white" th:text="${u.name}">Administrator</td>
+                            <td class="user-email py-4 px-4 font-mono text-xs text-slate-300" th:text="${u.email}">admin@hospital.com</td>
+                            <td class="user-role py-4 px-4">
+                                <span th:if="${u.role.name() == 'ADMIN'}" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-purple-950 border border-purple-500/40 text-purple-300 font-bold">ADMINISTRATOR</span>
+                                <span th:if="${u.role.name() == 'DOCTOR'}" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-teal-950 border border-teal-500/40 text-teal-300 font-bold">FIELD DOCTOR</span>
+                                <span th:if="${u.role.name() == 'PATIENT'}" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-bold">CITIZEN</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <form th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post" class="flex items-center gap-2">
+                                    <select name="role" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:border-telemetry outline-none font-mono">
+                                        <option value="ADMIN" th:selected="${u.role.name() == 'ADMIN'}">ADMIN</option>
+                                        <option value="DOCTOR" th:selected="${u.role.name() == 'DOCTOR'}">DOCTOR</option>
+                                        <option value="PATIENT" th:selected="${u.role.name() == 'PATIENT'}">PATIENT</option>
+                                    </select>
+                                    <button type="submit" class="text-[11px] font-mono uppercase bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="py-4 px-4 text-right">
+                                <form th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post" class="inline"
+                                      onsubmit="return confirm('Purge this identity credential from CareSoft Health Bridge network?');">
+                                    <button type="submit" class="text-xs font-mono text-red-400 hover:text-red-300 p-2 rounded-lg bg-red-950/40 border border-red-500/30 hover:border-red-500/60 transition" title="Purge Record">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function filterUsers(query) {
+            const q = query.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+            rows.forEach(row => {
+                const name = (row.querySelector('.user-name')?.textContent || '').toLowerCase();
+                const email = (row.querySelector('.user-email')?.textContent || '').toLowerCase();
+                const role = (row.querySelector('.user-role')?.textContent || '').toLowerCase();
+                row.style.display = (name.includes(q) || email.includes(q) || role.includes(q)) ? '' : 'none';
+            });
+        }
+    </script>
+
+</body>
+</html>

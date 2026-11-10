@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Medical Officer Deck | CareSoft Health Bridge: UNESCO Global Health Logistics</title>
+    
+    <!-- Spring Security CSRF Meta Tokens -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script src="/js/caresoft-security-guard.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar v6 -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030712',
+                        clinical: '#0b1329',
+                        surface: '#0f172a',
+                        cryo: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        telemetry: '#00f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 240, 255, 0.02) 50%, rgba(0, 240, 255, 0.02));
+            background-size: 100% 4px;
+        }
+        .fc {
+            --fc-border-color: rgba(51, 65, 85, 0.6);
+            --fc-page-bg-color: transparent;
+            --fc-neutral-bg-color: rgba(15, 23, 42, 0.7);
+            --fc-list-event-hover-bg-color: rgba(0, 240, 255, 0.1);
+            --fc-today-bg-color: rgba(13, 148, 136, 0.15);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #cbd5e1;
+        }
+        .fc th {
+            padding: 10px 0 !important;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.6) !important;
+        }
+        .fc-button-primary {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #38bdf8 !important;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 12px !important;
+            border-radius: 8px !important;
+            text-transform: uppercase !important;
+        }
+        .fc-button-primary:hover, .fc-button-primary-active {
+            background-color: #0d9488 !important;
+            border-color: #00f0ff !important;
+            color: #030712 !important;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.3) !important;
+        }
+        .fc-event {
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            border: 1px solid rgba(0, 240, 255, 0.3) !important;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.9), rgba(15, 118, 110, 0.9)) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-void text-slate-100 min-h-screen font-sans scanline" data-user-role="DOCTOR" th:data-user-email="${doctor.email}">
+
+    <!-- Top Navigation HUD -->
+    <header class="glass-panel sticky top-0 z-50 border-x-0 border-t-0 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex justify-between items-center">
+            
+            <div class="flex items-center gap-4">
+                <a href="/doctor/dashboard" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cryo-600 to-telemetry flex items-center justify-center text-void shadow-md shadow-telemetry/20">
+                        <i class="fas fa-user-doctor text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                            <span>CareSoft <span class="text-telemetry">Health Bridge</span></span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-teal-950/80 border border-teal-500/30 text-teal-400">Doctor Deck</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-mono">FIELD MEDICAL LOGISTICS STATION</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Doctor Officer Info & Controls -->
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80">
+                    <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+                    <span class="text-xs font-mono text-teal-300 font-semibold" th:text="${doctor.name}">Dr. Sarah Jenkins</span>
+                    <span class="text-[10px] font-mono text-slate-500">| STATION #01</span>
+                </div>
+
+                <button type="button" onclick="CareSoftSecurity.logout()" class="text-xs font-mono text-red-400 hover:text-red-300 px-3 py-2 rounded-xl bg-red-950/30 border border-red-500/20 hover:border-red-500/40 transition flex items-center gap-1.5" title="Terminate Shift">
+                    <i class="fas fa-power-off"></i>
+                    <span class="hidden sm:inline">Terminate Shift</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        
+        <!-- Clinical Shift Briefing Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-mono uppercase text-slate-400">TODAY'S PATIENT QUEUE</p>
+                    <p class="text-3xl font-extrabold font-mono text-cyan-400 mt-1" th:text="${totalToday ?: 0}">0</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Confirmed Triage Slots</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-cyan-400">
+                    <i class="fas fa-clipboard-user text-xl"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-mono uppercase text-slate-400">UPCOMING CONSULTATIONS</p>
+                    <p class="text-3xl font-extrabold font-mono text-emerald-400 mt-1" th:text="${upcoming != null ? upcoming.size() : 0}">0</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Future Session Horizon</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-emerald-400">
+                    <i class="fas fa-clock-rotate-left text-xl"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-mono uppercase text-slate-400">OPERATIONAL STATUS</p>
+                    <p class="text-lg font-bold font-mono text-teal-300 mt-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>ON-DUTY</span>
+                    </p>
+                    <p class="text-[11px] text-slate-500 mt-1 font-mono" th:text="${doctor.email}">sarah@hospital.com</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-teal-400">
+                    <i class="fas fa-stethoscope text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2-Column Clinical Layout: Today's Queue & Weekly Agenda -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Column: Today's Clinical Queue -->
+            <div class="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-user-check text-telemetry"></i> Today's Patient Queue
+                        </h2>
+                        <p class="text-xs text-slate-400 font-mono">PRIORITY ORDERED // LIVE SYNC</p>
+                    </div>
+                    <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-cyan-400"
+                          th:text="${totalToday + ' Active'}">0 Active</span>
+                </div>
+
+                <!-- Instant Queue Search Bar -->
+                <div>
+                    <input type="text" id="queueSearch" placeholder="Filter patient queue..." oninput="filterQueue(this.value)"
+                           class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry text-xs text-white rounded-xl px-3.5 py-2 font-mono outline-none">
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(todayAppointments)}" class="p-8 text-center text-slate-500 text-xs font-mono">
+                    <i class="fas fa-clipboard-check text-3xl mb-2 text-slate-600 block"></i>
+                    No consultations scheduled for today's shift.
+                </div>
+
+                <!-- Patient Cards List -->
+                <div id="queueList" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                    <div th:each="apt : ${todayAppointments}"
+                         class="patient-card p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:border-cyan-500/40 transition group">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="patient-name text-sm font-bold text-white group-hover:text-cyan-300 transition" th:text="${apt.patient != null ? apt.patient.name : 'Unknown Citizen'}">John Doe</h3>
+                                <p class="text-xs text-slate-400 font-mono mt-0.5" th:text="${apt.title}">General Checkup</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-cyan-950 border border-cyan-500/30 text-cyan-400"
+                                  th:text="${apt.status}">SCHEDULED</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono text-slate-400">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fas fa-clock text-telemetry"></i>
+                                <span th:text="${#temporals.format(apt.startTime, 'hh:mm a')}">10:30 AM</span>
+                            </span>
+                            <span class="text-[11px] text-slate-500" th:text="${apt.patient != null ? (apt.patient.phone ?: 'No Phone') : 'No Phone'}">+1-555</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Interactive TimeGrid Agenda -->
+            <div class="lg:col-span-7 glass-panel p-6 rounded-3xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-timeline text-telemetry"></i> Weekly Clinical Agenda
+                        </h2>
+                        <p class="text-xs text-slate-400 font-mono">TIME-GRID PROTOCOL // TELEMETRY CALENDAR</p>
+                    </div>
+                </div>
+                <div id="doctorCalendar" class="min-h-[550px]"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Doctor Consultation Modal -->
+    <div id="docEventModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl relative border border-teal-500/40 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-teal-950 flex items-center justify-center text-teal-400">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <span class="text-xs font-mono uppercase text-slate-300">Officer Clinical Review</span>
+                </div>
+                <button type="button" onclick="closeDocModal()" class="text-slate-400 hover:text-white text-sm font-mono">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="mt-4 space-y-3 font-sans">
+                <h3 id="docModalTitle" class="text-lg font-bold text-white">Checkup Title</h3>
+                
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 text-xs font-mono text-slate-300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">CITIZEN:</span>
+                        <span id="docModalPatient" class="text-cyan-300 font-bold">John Doe</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">STATUS:</span>
+                        <span id="docModalStatus" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-cyan-950 border border-cyan-500/40 text-cyan-400">SCHEDULED</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">SESSION START:</span>
+                        <span id="docModalStart" class="text-white">--</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">SESSION END:</span>
+                        <span id="docModalEnd" class="text-white">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button type="button" onclick="closeDocModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono uppercase text-slate-300 transition">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('doctorCalendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+                height: 'auto',
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    fetch('/appointment/doctor/events')
+                        .then(res => res.json())
+                        .then(data => {
+                            const events = data.map(item => {
+                                const status = (item.status || 'SCHEDULED').toUpperCase();
+                                return {
+                                    id: item.id,
+                                    title: item.title,
+                                    start: item.start || item.startTime,
+                                    end: item.end || item.endTime,
+                                    extendedProps: {
+                                        status: status,
+                                        patientName: item.patientName || 'Citizen'
+                                    },
+                                    backgroundColor: status === 'COMPLETED' ? '#0d9488' : '#0284c7',
+                                    borderColor: status === 'COMPLETED' ? '#10b981' : '#00f0ff'
+                                };
+                            });
+                            successCallback(events);
+                        })
+                        .catch(err => failureCallback(err));
+                },
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                allDaySlot: false,
+                nowIndicator: true,
+                eventClick: function(info) {
+                    openDocModal(info.event);
+                }
+            });
+
+            calendar.render();
+
+            // Refresh events every 30 seconds
+            setInterval(() => {
+                calendar.refetchEvents();
+            }, 30000);
+        });
+
+        function filterQueue(query) {
+            const q = query.toLowerCase();
+            const cards = document.querySelectorAll('.patient-card');
+            cards.forEach(card => {
+                const name = card.querySelector('.patient-name').textContent.toLowerCase();
+                card.style.display = name.includes(q) ? 'block' : 'none';
+            });
+        }
+
+        function openDocModal(event) {
+            document.getElementById('docModalTitle').textContent = event.title;
+            document.getElementById('docModalPatient').textContent = event.extendedProps.patientName || 'Citizen';
+            const status = event.extendedProps.status || 'SCHEDULED';
+            const statusEl = document.getElementById('docModalStatus');
+            statusEl.textContent = status;
+            statusEl.className = status === 'COMPLETED'
+                ? 'px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400'
+                : 'px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-cyan-950 border border-cyan-500/40 text-cyan-400';
+
+            document.getElementById('docModalStart').textContent = event.start ? event.start.toLocaleString() : 'N/A';
+            document.getElementById('docModalEnd').textContent = event.end ? event.end.toLocaleString() : 'N/A';
+            document.getElementById('docEventModal').classList.remove('hidden');
+        }
+
+        function closeDocModal() {
+            document.getElementById('docEventModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

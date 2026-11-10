@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Operations Console | CareSoft Health Bridge: UNESCO Global Health Logistics</title>
+    
+    <!-- Spring Security CSRF Meta Tokens -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script src="/js/caresoft-security-guard.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030712',
+                        clinical: '#0b1329',
+                        surface: '#0f172a',
+                        cryo: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        telemetry: '#00f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 240, 255, 0.02) 50%, rgba(0, 240, 255, 0.02));
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-void text-slate-100 min-h-screen font-sans scanline" data-user-role="ADMIN">
+
+    <!-- Top Command HUD -->
+    <header class="glass-panel sticky top-0 z-50 border-x-0 border-t-0 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex justify-between items-center">
+            
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashboard" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-telemetry flex items-center justify-center text-white shadow-md shadow-purple-500/20">
+                        <i class="fas fa-tower-broadcast text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                            <span>CareSoft <span class="text-telemetry">Health Bridge</span></span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-950/80 border border-purple-500/30 text-purple-300">Operations Command</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-mono">UNESCO GLOBAL HEALTH HEADQUARTERS</p>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="flex items-center gap-3 sm:gap-6">
+                <a href="/admin/users" class="text-xs font-mono text-slate-300 hover:text-telemetry transition flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800">
+                    <i class="fas fa-users-gear text-telemetry"></i>
+                    <span>Personnel</span>
+                </a>
+                <a href="/admin/appointments" class="text-xs font-mono text-slate-300 hover:text-telemetry transition flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800">
+                    <i class="fas fa-clipboard-list text-telemetry"></i>
+                    <span>Bookings</span>
+                </a>
+                <button type="button" onclick="CareSoftSecurity.logout()" class="text-xs font-mono text-red-400 hover:text-red-300 p-2.5 rounded-xl bg-red-950/30 border border-red-500/20 hover:border-red-500/40 transition" title="Logout">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        
+        <!-- Live System Metric Telemetry -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Total Accounts -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:border-telemetry/50 transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-mono uppercase text-slate-400">TOTAL NETWORK ACCOUNTS</p>
+                        <p class="kpi-counter text-3xl font-extrabold font-mono text-white mt-1" th:data-target="${totalUsers}" th:text="${totalUsers}">124</p>
+                        <p class="text-[11px] text-emerald-400 mt-1 font-mono">Authenticated Credentials</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-telemetry">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Patients -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:border-telemetry/50 transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-mono uppercase text-slate-400">REGISTERED CITIZENS</p>
+                        <p class="kpi-counter text-3xl font-extrabold font-mono text-cyan-400 mt-1" th:data-target="${totalPatients}" th:text="${totalPatients}">98</p>
+                        <p class="text-[11px] text-cyan-400 mt-1 font-mono">Health Profiles Synchronized</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-cyan-400">
+                        <i class="fas fa-hospital-user text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Doctors -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:border-telemetry/50 transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-mono uppercase text-slate-400">FIELD MEDICAL OFFICERS</p>
+                        <p class="kpi-counter text-3xl font-extrabold font-mono text-teal-400 mt-1" th:data-target="${totalDoctors}" th:text="${totalDoctors}">12</p>
+                        <p class="text-[11px] text-teal-400 mt-1 font-mono">Active Consultation Duty</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-teal-400">
+                        <i class="fas fa-user-doctor text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Appointments -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:border-telemetry/50 transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-mono uppercase text-slate-400">GLOBAL BOOKINGS</p>
+                        <p class="kpi-counter text-3xl font-extrabold font-mono text-purple-400 mt-1" th:data-target="${totalAppointments}" th:text="${totalAppointments}">45</p>
+                        <p class="text-[11px] text-purple-400 mt-1 font-mono">Telemetry Scheduled</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-purple-400">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Recent Appointments Audit Table -->
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-chart-line text-telemetry"></i> Recent Global Health Consultations
+                    </h2>
+                    <p class="text-xs text-slate-400 font-mono mt-0.5">LATEST 10 TELEMETRY EVENTS IN REVERSE CHRONOLOGICAL ORDER</p>
+                </div>
+                <a href="/admin/appointments" class="text-xs font-mono text-telemetry hover:underline flex items-center gap-1.5">
+                    <span>View Complete Ledger</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs font-mono text-slate-400 uppercase">
+                            <th class="py-3 px-4">Citizen / Patient</th>
+                            <th class="py-3 px-4">Attending Doctor</th>
+                            <th class="py-3 px-4">Consultation Time</th>
+                            <th class="py-3 px-4">Subject</th>
+                            <th class="py-3 px-4 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-sans">
+                        <tr th:each="apt : ${recentAppointments}" class="hover:bg-slate-900/50 transition">
+                            <td class="py-4 px-4 font-semibold text-white" th:text="${apt.patient != null ? apt.patient.name : 'Unknown Citizen'}">John Doe</td>
+                            <td class="py-4 px-4 text-teal-300 font-mono text-xs" th:text="${apt.doctor != null ? apt.doctor.name : 'Unassigned'}">Dr. Sarah</td>
+                            <td class="py-4 px-4 font-mono text-xs text-slate-300" th:text="${#temporals.format(apt.startTime, 'dd MMM yyyy, hh:mm a')}">10 Nov 2026, 10:13 PM</td>
+                            <td class="py-4 px-4 text-xs text-slate-400" th:text="${apt.title ?: 'General Consultation'}">Checkup</td>
+                            <td class="py-4 px-4 text-right">
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-mono uppercase bg-cyan-950 border border-cyan-500/30 text-cyan-400"
+                                      th:text="${apt.status}">SCHEDULED</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Command Dock Shortcuts -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <a href="/admin/users" class="glass-panel p-6 rounded-2xl hover:border-telemetry transition flex items-center gap-5 group">
+                <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-telemetry group-hover:scale-110 transition">
+                    <i class="fas fa-users-gear text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white group-hover:text-telemetry transition">Global Personnel Directory</h3>
+                    <p class="text-xs text-slate-400 mt-1">Manage credentials, assign doctor authority, and purge obsolete profiles.</p>
+                </div>
+            </a>
+
+            <a href="/admin/appointments" class="glass-panel p-6 rounded-2xl hover:border-telemetry transition flex items-center gap-5 group">
+                <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-purple-400 group-hover:scale-110 transition">
+                    <i class="fas fa-calendar-check text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition">Complete Booking Ledger</h3>
+                    <p class="text-xs text-slate-400 mt-1">Audit all upcoming, completed, and emergency hospital consultation sessions.</p>
+                </div>
+            </a>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.kpi-counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.dataset.target || counter.textContent) || 0;
+                let current = 0;
+                const increment = Math.max(1, Math.ceil(target / 25));
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = current;
+                    }
+                }, 30);
+            });
+        });
+    </script>
+</body>
+</html>

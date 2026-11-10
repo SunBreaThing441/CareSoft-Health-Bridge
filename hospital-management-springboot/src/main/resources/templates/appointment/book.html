@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Consultation | CareSoft Health Bridge: UNESCO Global Health Logistics</title>
+    
+    <!-- Spring Security CSRF Meta Tokens -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script src="/js/caresoft-security-guard.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030712',
+                        clinical: '#0b1329',
+                        surface: '#0f172a',
+                        cryo: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        telemetry: '#00f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 240, 255, 0.02) 50%, rgba(0, 240, 255, 0.02));
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-void text-slate-100 min-h-screen font-sans scanline py-8 px-4 flex items-center justify-center" data-user-role="PATIENT">
+
+    <main class="w-full max-w-3xl z-10">
+        <div class="glass-panel p-8 sm:p-10 rounded-3xl relative">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cryo-600 to-telemetry flex items-center justify-center text-void shadow-md shadow-telemetry/20">
+                        <i class="fas fa-stethoscope text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Schedule Clinical Consultation</h1>
+                        <p class="text-xs text-slate-400 font-mono">UNESCO GLOBAL HEALTH LOGISTICS // DISPATCH TERMINAL</p>
+                    </div>
+                </div>
+                <a href="/patient/dashboard" class="text-xs font-mono text-slate-400 hover:text-telemetry transition flex items-center gap-1.5">
+                    <i class="fas fa-xmark"></i> Cancel
+                </a>
+            </div>
+
+            <!-- Error Alerts -->
+            <div th:if="${error}" class="mt-6 p-4 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs flex items-center gap-2.5">
+                <i class="fas fa-triangle-exclamation text-base text-red-400"></i>
+                <span th:text="${error}">Booking alert message</span>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/appointment/book}" method="post" class="mt-8 space-y-6">
+                
+                <!-- Doctor Selection -->
+                <div>
+                    <label class="block text-xs font-mono uppercase text-slate-300 mb-2 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fas fa-user-doctor text-telemetry"></i> Attending Field Doctor / Medical Officer</span>
+                        <span id="docBadge" class="text-[10px] text-teal-400 font-mono hidden">Station Verified</span>
+                    </label>
+                    <select id="doctorSelect" name="doctorId" required onchange="handleDoctorSelect(this)"
+                            class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3.5 text-sm transition outline-none">
+                        <option value="">-- Select Certified Medical Officer --</option>
+                        <option th:each="doc : ${doctors}"
+                                th:value="${doc.id}"
+                                th:data-email="${doc.email}"
+                                th:text="${doc.name + ' (' + doc.email + ')'}">Dr. Sarah Jenkins</option>
+                    </select>
+
+                    <!-- Doctor Quick Preview Card -->
+                    <div id="doctorCard" class="hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-teal-500/30 flex items-center justify-between text-xs font-mono">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-teal-950 flex items-center justify-center text-teal-400">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div>
+                                <span id="docNameDisplay" class="font-bold text-white block">Dr. Sarah Jenkins</span>
+                                <span id="docEmailDisplay" class="text-[10px] text-slate-400">sarah@hospital.com</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-bold">ONLINE & AVAILABLE</span>
+                    </div>
+                </div>
+
+                <!-- Date and Time Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="fas fa-calendar-day text-telemetry"></i> Consultation Date
+                        </label>
+                        <input type="date" id="dateInput" name="date" required
+                               class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3.5 text-sm transition outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="fas fa-clock text-telemetry"></i> Consultation Time Slot
+                        </label>
+                        <input type="time" id="timeInput" name="time" required
+                               class="w-full bg-slate-900/90 border border-slate-700 focus:border-telemetry focus:ring-2 focus:ring-telemetry/20 text-white rounded-xl px-4 py-3.5 text-sm transition outline-none">
+                    </div>
+                </div>
+
+                <!-- Quick Timeslot Pills -->
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-2">
+                        <i class="fas fa-bolt text-amber-400 mr-1"></i> Quick Allocation Slots:
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="setTimeSlot('09:00')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">09:00 AM</button>
+                        <button type="button" onclick="setTimeSlot('10:30')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">10:30 AM</button>
+                        <button type="button" onclick="setTimeSlot('11:30')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">11:30 AM</button>
+                        <button type="button" onclick="setTimeSlot('14:00')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">02:00 PM</button>
+                        <button type="button" onclick="setTimeSlot('15:30')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">03:30 PM</button>
+                        <button type="button" onclick="setTimeSlot('17:00')" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition">05:00 PM</button>
+                    </div>
+                </div>
+
+                <!-- Consultation Protocol Info Card -->
+                <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 text-xs text-slate-400 space-y-1.5 font-mono">
+                    <div class="text-slate-300 font-semibold flex items-center gap-1.5">
+                        <i class="fas fa-circle-info text-cyan-400"></i> PROTOCOL DISPATCH TERMS:
+                    </div>
+                    <p>• Standard clinical checkup duration: 30 minutes allocation.</p>
+                    <p>• Medical record will synchronize automatically with the UNESCO telemetry database.</p>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
+                    <button type="submit" id="bookSubmitBtn"
+                            class="w-full bg-gradient-to-r from-cryo-600 via-teal-500 to-telemetry hover:opacity-95 text-void font-extrabold py-4 rounded-xl text-sm font-mono uppercase tracking-wider transition-all duration-200 transform hover:scale-[1.01] shadow-lg shadow-cryo-600/30 flex items-center justify-center gap-2">
+                        <i class="fas fa-check-double"></i>
+                        <span id="bookBtnText">Confirm Telemetry Booking</span>
+                    </button>
+                    <a href="/patient/dashboard"
+                       class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono text-sm uppercase text-center transition">
+                        Back
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set min booking date to today
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('dateInput');
+            if (dateInput) {
+                dateInput.min = today;
+                dateInput.value = today;
+            }
+
+            // Default time to next hour
+            const timeInput = document.getElementById('timeInput');
+            if (timeInput && !timeInput.value) {
+                const now = new Date();
+                const nextHour = String((now.getHours() + 1) % 24).padStart(2, '0') + ':00';
+                timeInput.value = nextHour;
+            }
+
+            // Spinner on form submit
+            const form = document.querySelector('form');
+            form.addEventListener('submit', () => {
+                const btn = document.getElementById('bookSubmitBtn');
+                const text = document.getElementById('bookBtnText');
+                if (btn && text) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75');
+                    text.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Scheduling Consultation...';
+                }
+            });
+        });
+
+        function handleDoctorSelect(select) {
+            const card = document.getElementById('doctorCard');
+            const badge = document.getElementById('docBadge');
+            const name = document.getElementById('docNameDisplay');
+            const email = document.getElementById('docEmailDisplay');
+
+            if (select.value) {
+                const option = select.options[select.selectedIndex];
+                name.textContent = option.text.split(' (')[0];
+                email.textContent = option.dataset.email || '';
+                card.classList.remove('hidden');
+                badge.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+                badge.classList.add('hidden');
+            }
+        }
+
+        function setTimeSlot(slot) {
+            document.getElementById('timeInput').value = slot;
+        }
+    </script>
+
+</body>
+</html>
